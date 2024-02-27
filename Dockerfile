@@ -1,9 +1,9 @@
 # Instalar ROS noetic
 FROM ros:noetic-ros-base-buster
 
-# Añadir un usuario llamado ros con el id 1000
+# Añadir un usuario llamado tknika con el id 1000
 ARG USERNAME=tknika
-ARG USERID=1001
+ARG USERID=1000
 RUN groupadd --gid $USERID $USERNAME && \
     useradd --uid $USERID --gid $USERID -ms /bin/bash $USERNAME && \
     echo $USERNAME ALL=\(root\) NOPASSWD:ALL > /etc/sudoers.d/$USERNAME && \
