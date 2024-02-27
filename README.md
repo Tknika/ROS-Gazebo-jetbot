@@ -50,4 +50,4 @@ docker exec -it --user tknika rosGazeboJebotNET /bin/bash
 
 ## Credits
 
-Python-eko jatorrizko kodea Mikel Aldurrek garatu zuen Tknikan. Mila esker!
+Dev Containerra egitea lortzen dudanean eguneratuko dut.
