@@ -11,10 +11,10 @@ RUN groupadd --gid $USERID $USERNAME && \
 
 # Instalar paquetes de linux de manera desatendida
 RUN apt-get update && apt-get install -y \
-nano \
-terminator \
-wget \
-unzip
+    nano \
+    terminator \
+    wget \
+    unzip
 
 RUN apt-get install python3-pip -y
 RUN pip3 install pynput
@@ -50,23 +50,21 @@ RUN mkdir /home/${USERNAME}/.gazebo
 ADD gazebo_resources.tar.xz /home/${USERNAME}/.gazebo/
 
 # Crear el workspace gazebo_ws (no probado)
-RUN mkdir -p  /tmp/curso_ros/gazebo_ws/src
-WORKDIR /tmp/curso_ros/gazebo_ws
-RUN /bin/bash -c '. /opt/ros/noetic/setup.bash; cd /tmp/curso_ros/gazebo_ws; catkin_make'
+RUN mkdir -p  /opt/curso_ros/gazebo_ws/src
+WORKDIR /opt/curso_ros/gazebo_ws
+RUN /bin/bash -c '. /opt/ros/noetic/setup.bash; cd /opt/curso_ros/gazebo_ws; catkin_make'
 
 # Descomprimir modelos navegación jetbot y lo configuramos
-ADD jetbot_ws.zip /tmp/curso_ros/gazebo_ws/src
-RUN unzip /tmp/curso_ros/gazebo_ws/src/jetbot_ws.zip -d /tmp/curso_ros/gazebo_ws/src
-RUN ls -lh /tmp/curso_ros/gazebo_ws/src
-RUN mv /tmp/curso_ros/gazebo_ws/src/jetbot_diff_drive/jetbot_navigation /tmp/
-#RUN rm -rf $HOME/curso_ros/gazebo_ws/src/jetbot_diff_drive/jetbot_navigation
+ADD jetbot_ws.zip /opt/curso_ros/gazebo_ws/src
+RUN unzip /opt/curso_ros/gazebo_ws/src/jetbot_ws.zip -d /opt/curso_ros/gazebo_ws/src
+RUN mv /opt/curso_ros/gazebo_ws/src/jetbot_diff_drive/jetbot_navigation /tmp/
 COPY catkin_workspace.cmake /opt/ros/noetic/share/catkin/cmake/
-RUN /bin/bash -c '. /opt/ros/noetic/setup.bash; cd /tmp/curso_ros/gazebo_ws; catkin_make'
-RUN mv /tmp/jetbot_navigation /tmp/curso_ros/gazebo_ws/src/jetbot_diff_drive/
+RUN /bin/bash -c '. /opt/ros/noetic/setup.bash; cd /opt/curso_ros/gazebo_ws; catkin_make'
+RUN mv /tmp/jetbot_navigation /opt/curso_ros/gazebo_ws/src/jetbot_diff_drive/
 
-# Cambiar el propietario de las carpetas /tmp/curso_ros y /home/${USERNAME}/.gazebo
-# a $USERNAME
-RUN chown -R ${USERNAME}:${USERNAME} /tmp/curso_ros
+# Cambiar el propietario de las carpetas /opt/curso_ros
+# y /home/${USERNAME}/.gazebo a $USERNAME
+RUN chown -R ${USERNAME}:${USERNAME} /opt/curso_ros
 RUN chown -R ${USERNAME}:${USERNAME} /home/${USERNAME}/.gazebo
 
 # Añadir el usuario $USERNAME al grupo vídeo
