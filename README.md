@@ -29,7 +29,7 @@ docker run --name rosGazeboJebotNET -it \
 --device=/dev/dri:/dev/dri \
 --device=/dev/snd:/dev/snd \
 --privileged -v /dev/bus/usb:/dev/bus/usb \
--v $HOME/curso_ros/:/tmp/curso_ros/:rw \
+-v $HOME/curso_ros/:/workspace/:rw \
 -v /tmp/.X11-unix:/tmp/.X11-unix \
 --net=host \
 --env="QT_X11_NO_MITSHM=1" \
