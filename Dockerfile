@@ -11,10 +11,10 @@ RUN groupadd --gid $USERID $USERNAME && \
 
 # Instalar paquetes de linux de manera desatendida
 RUN apt-get update && apt-get install -y \
-nano \
-terminator \
-wget \
-unzip
+    nano \
+    terminator \
+    wget \
+    unzip
 
 RUN apt-get install python3-pip -y
 RUN pip3 install pynput
@@ -49,25 +49,41 @@ RUN mkdir /home/${USERNAME}/.gazebo
 # Descomprimir mundos y modelos para gazebo
 ADD gazebo_resources.tar.xz /home/${USERNAME}/.gazebo/
 
-# Crear el workspace gazebo_ws (no probado)
-RUN mkdir -p  /tmp/curso_ros/gazebo_ws/src
-WORKDIR /tmp/curso_ros/gazebo_ws
-RUN /bin/bash -c '. /opt/ros/noetic/setup.bash; cd /tmp/curso_ros/gazebo_ws; catkin_make'
+# Crear el workspace
+ARG INIT_WORKDIR_FOLDER=/init_workspace
+ARG WORKDIR_FOLDER=/workspace
+RUN mkdir -p ${INIT_WORKDIR_FOLDER}/src
+RUN mkdir -p ${WORKDIR_FOLDER}
+WORKDIR ${INIT_WORKDIR_FOLDER}
+RUN /bin/bash -c '. /opt/ros/noetic/setup.bash; cd ${INIT_WORKDIR_FOLDER}; catkin_make'
 
 # Descomprimir modelos navegación jetbot y lo configuramos
-ADD jetbot_ws.zip /tmp/curso_ros/gazebo_ws/src
-RUN unzip /tmp/curso_ros/gazebo_ws/src/jetbot_ws.zip -d /tmp/curso_ros/gazebo_ws/src
-RUN ls -lh /tmp/curso_ros/gazebo_ws/src
-RUN mv /tmp/curso_ros/gazebo_ws/src/jetbot_diff_drive/jetbot_navigation /tmp/
-#RUN rm -rf $HOME/curso_ros/gazebo_ws/src/jetbot_diff_drive/jetbot_navigation
+ADD jetbot_ws.zip ${INIT_WORKDIR_FOLDER}/src
+RUN unzip ${INIT_WORKDIR_FOLDER}/src/jetbot_ws.zip -d ${INIT_WORKDIR_FOLDER}/src
+RUN mv ${INIT_WORKDIR_FOLDER}/src/jetbot_diff_drive/jetbot_navigation /tmp/
 COPY catkin_workspace.cmake /opt/ros/noetic/share/catkin/cmake/
-RUN /bin/bash -c '. /opt/ros/noetic/setup.bash; cd /tmp/curso_ros/gazebo_ws; catkin_make'
-RUN mv /tmp/jetbot_navigation /tmp/curso_ros/gazebo_ws/src/jetbot_diff_drive/
+RUN /bin/bash -c '. /opt/ros/noetic/setup.bash; cd ${INIT_WORKDIR_FOLDER}; catkin_make'
+RUN mv /tmp/jetbot_navigation ${INIT_WORKDIR_FOLDER}/src/jetbot_diff_drive/
 
-# Cambiar el propietario de las carpetas /tmp/curso_ros y /home/${USERNAME}/.gazebo
-# a $USERNAME
-RUN chown -R ${USERNAME}:${USERNAME} /tmp/curso_ros
+# Cambiar el propietario de las carpetas ${INIT_WORKDIR_FOLDER}, ${WORKDIR_FOLDER}
+# y /home/${USERNAME}/.gazebo a $USERNAME
+RUN chown -R ${USERNAME}:${USERNAME} ${INIT_WORKDIR_FOLDER}
+RUN chown -R ${USERNAME}:${USERNAME} ${WORKDIR_FOLDER}
 RUN chown -R ${USERNAME}:${USERNAME} /home/${USERNAME}/.gazebo
 
-# Añadir el usuario $USERNAME al grupo vídeo
+# Añadir el usuario $USERNAME al grupo video
 RUN addgroup ${USERNAME} video
+
+# Copiar script de sincronización
+ADD workspace-sync.sh /app/workspace-sync.sh
+RUN chown ${USERNAME}:${USERNAME} /app/workspace-sync.sh
+RUN chmod 755 /app/workspace-sync.sh
+
+# Cambiar el usuario a $USERNAME
+USER ${USERNAME}
+
+# Cambiar el directorio de trabajo a ${WORKDIR_FOLDER}
+WORKDIR ${WORKDIR_FOLDER}
+
+# Ejecutar el script de sincronización al iniciar el contenedor
+ENTRYPOINT [ "/app/workspace-sync.sh" ]
