@@ -52,8 +52,9 @@ ADD gazebo_resources.tar.xz /home/${USERNAME}/.gazebo/
 # Crear el workspace
 ARG INIT_WORKDIR_FOLDER=/init_workspace
 ARG WORKDIR_FOLDER=/workspace
+ARG WS_NAME=/ROS-Gazebo-jetbot-ws
 RUN mkdir -p ${INIT_WORKDIR_FOLDER}/src
-RUN mkdir -p ${WORKDIR_FOLDER}
+RUN mkdir -p ${WORKDIR_FOLDER}/${WS_NAME}
 WORKDIR ${INIT_WORKDIR_FOLDER}
 RUN /bin/bash -c '. /opt/ros/noetic/setup.bash; cd ${INIT_WORKDIR_FOLDER}; catkin_make'
 
@@ -68,7 +69,7 @@ RUN mv /tmp/jetbot_navigation ${INIT_WORKDIR_FOLDER}/src/jetbot_diff_drive/
 # Cambiar el propietario de las carpetas ${INIT_WORKDIR_FOLDER}, ${WORKDIR_FOLDER}
 # y /home/${USERNAME}/.gazebo a $USERNAME
 RUN chown -R ${USERNAME}:${USERNAME} ${INIT_WORKDIR_FOLDER}
-RUN chown -R ${USERNAME}:${USERNAME} ${WORKDIR_FOLDER}
+RUN chown -R ${USERNAME}:${USERNAME} ${WORKDIR_FOLDER}/${WS_NAME}
 RUN chown -R ${USERNAME}:${USERNAME} /home/${USERNAME}/.gazebo
 
 # Añadir el usuario $USERNAME al grupo video
@@ -83,7 +84,7 @@ RUN chmod 755 /app/workspace-sync.sh
 USER ${USERNAME}
 
 # Cambiar el directorio de trabajo a ${WORKDIR_FOLDER}
-WORKDIR ${WORKDIR_FOLDER}
+WORKDIR ${WORKDIR_FOLDER}/${WS_NAME}
 
 # Ejecutar el script de sincronización al iniciar el contenedor
 ENTRYPOINT [ "/app/workspace-sync.sh" ]
